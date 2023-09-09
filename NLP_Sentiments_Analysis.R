@@ -26,4 +26,24 @@ nrc_joy <- get_sentiments("nrc") %>%  filter(sentiment == "joy")
 book <- tidy_books %>% filter(book == 'Emma') %>% inner_join(nrc_joy) %>% count(word, sort = TRUE)
 
 #usando o sistema bing para calcular o sentimento em polaridade
-jane_austen_sentiment
+jane_austen_sentiment <- tidy_books %>% inner_join(get_sentiments("bing"))
+
+persuasion <- jane_austen_sentiment %>% filter(book == "Persuasion")
+
+#ifelse para criar uma coluna dummie 
+persuasion <- persuasion %>% mutate(
+  net_sentiment = ifelse(sentiment=="negative",-1,1))
+
+# somando os dummies e assim verificando o sentimento do texto
+sum(persuasion$net_sentiment)
+
+#word cloud
+mansfield <- tidy_books %>% filter(book == "Mansfield Park")
+
+mansfield %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  acast(word ~ sentiment, value.var = "n", fill = 0) %>%
+  comparison.cloud(colors = c("red", "green"),
+                   scale=c(1,.5),
+                   max.words = 100)
