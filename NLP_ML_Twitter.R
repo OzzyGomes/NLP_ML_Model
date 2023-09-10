@@ -18,5 +18,23 @@ twitter <- twitter %>% select(V3,V4) %>% filter(V3 == c('Positive', 'Negative'))
 colnames(twitter) <- c('sentiment', 'text')
 
 #transformando em corpus TM
-corpus <- VCorpus(VectorSource(twitter$text))
+#Train set
+corpus = VCorpus(VectorSource(twitter$text))
+#convertendo para letras minusculas 
+corpus = tm_map(corpus, content_transformer(tolower))
+#Remmovendo numeros
+corpus = tm_map(corpus, removeNumbers)
+#removendo potuação
+corpus = tm_map(corpus, removePunctuation)
+#removendo stopwords
+corpus = tm_map(corpus, removeWords, stopwords("english"))
+#fazendo uma stemnização
+corpus = tm_map(corpus, stemDocument)
+#removendo espaços em branco
+corpus = tm_map(corpus, stripWhitespace)
+
+# DTM Matrix para identificar quantas vezes cada palavra aparece no documento
+dtm = DocumentTermMatrix(corpus)
+inspect(dtm)
+
 
