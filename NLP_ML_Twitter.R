@@ -36,5 +36,34 @@ corpus = tm_map(corpus, stripWhitespace)
 # DTM Matrix para identificar quantas vezes cada palavra aparece no documento
 dtm = DocumentTermMatrix(corpus)
 inspect(dtm)
+dim(dtm)
 
+#função para converter em binario e em seguida em yes or no
+convert <- function(x) 
+{
+  y <- ifelse(x > 0, 1,0)
+  y <- factor(y, levels=c(0,1), labels=c("No", "Yes"))
+  y
+}  
 
+#aplicando a função ao dataframe
+datanaive = apply(dtm, 2, convert)
+
+#transformando em dataframe
+dataset = as.data.frame(as.matrix(datanaive))   
+#adicionando mais uma coluna com o sentimento de cada frase
+dataset$Class = factor(twitter$sentiment)
+
+#Modelagem Naive Bayes
+set.seed(31)
+split = sample(2,nrow(dataset),prob = c(0.75,0.25),replace = TRUE)
+train_set = dataset[split == 1,]
+test_set = dataset[split == 2,] 
+
+#Aplicando Naive Bayes
+classifier_nb <- naiveBayes(train_set[1:1439],train_set$Class)
+
+nb_predict <- predict(classifier_nb, type = "class", newdata = test_set[1:1439])
+
+#verificando a acuracia do modelo
+confusionMatrix(nb_predict, test_set$Class)
